@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>تسجيل الدخول - مجمع المدلوح</title>
+<title>تسجيل الدخول - SFDA Updates</title>
 <style>
   :root {
     --accent: #0b5ed7;
@@ -45,7 +45,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 18px;
+    font-size: 16px;
     margin: 0 auto 12px;
   }
   .brand h1 {
@@ -120,13 +120,26 @@
   }
   .step { display: none; }
   .step.active { display: block; }
+  .switch-row {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .switch-row a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .switch-row a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
   <div class="card">
     <div class="brand">
-      <div class="brand-mark">م</div>
-      <h1>مجمع المدلوح</h1>
+      <div class="brand-mark">SFDA</div>
+      <h1>SFDA Updates</h1>
       <p>نظام إدارة قوائم الأدوية</p>
     </div>
 
@@ -136,6 +149,9 @@
       <input type="email" id="email" placeholder="example@domain.com" autocomplete="email" />
       <button id="btn-send-otp">إرسال رمز التحقق</button>
       <div class="msg" id="msg-email"></div>
+      <div class="switch-row">
+        مفيش حساب؟ <a id="show-register">سجّل حساب جديد</a>
+      </div>
     </div>
 
     <!-- خطوة 2: إدخال رمز التحقق -->
@@ -147,6 +163,17 @@
       <button class="link-btn" id="btn-back">تغيير الإيميل</button>
       <div class="msg" id="msg-otp"></div>
     </div>
+
+    <!-- خطوة 3: تسجيل حساب جديد -->
+    <div class="step" id="step-register">
+      <label for="reg-name">الاسم</label>
+      <input type="text" id="reg-name" placeholder="اسمك الكامل" autocomplete="name" />
+      <label for="reg-email">الإيميل</label>
+      <input type="email" id="reg-email" placeholder="example@domain.com" autocomplete="email" />
+      <button id="btn-register">تسجيل حساب جديد</button>
+      <button class="link-btn" id="btn-back-from-register">رجوع لتسجيل الدخول</button>
+      <div class="msg" id="msg-register"></div>
+    </div>
   </div>
 
   <script>
@@ -155,16 +182,31 @@
 
     const stepEmail = document.getElementById("step-email");
     const stepOtp = document.getElementById("step-otp");
+    const stepRegister = document.getElementById("step-register");
+
     const emailInput = document.getElementById("email");
     const otpInput = document.getElementById("otp");
+    const regNameInput = document.getElementById("reg-name");
+    const regEmailInput = document.getElementById("reg-email");
+
     const msgEmail = document.getElementById("msg-email");
     const msgOtp = document.getElementById("msg-otp");
+    const msgRegister = document.getElementById("msg-register");
     const otpSentTo = document.getElementById("otp-sent-to");
+
     const btnSendOtp = document.getElementById("btn-send-otp");
     const btnVerifyOtp = document.getElementById("btn-verify-otp");
     const btnBack = document.getElementById("btn-back");
+    const btnRegister = document.getElementById("btn-register");
+    const showRegister = document.getElementById("show-register");
+    const btnBackFromRegister = document.getElementById("btn-back-from-register");
 
     let currentEmail = "";
+
+    function showStep(step) {
+      [stepEmail, stepOtp, stepRegister].forEach((s) => s.classList.remove("active"));
+      step.classList.add("active");
+    }
 
     // لو فيه جلسة شغالة أصلاً، نتجاوز صفحة الدخول
     (async function checkExistingSession() {
@@ -203,8 +245,7 @@
         if (data.success) {
           currentEmail = email;
           otpSentTo.textContent = `بعتنا رمز التحقق على: ${email}`;
-          stepEmail.classList.remove("active");
-          stepOtp.classList.add("active");
+          showStep(stepOtp);
           otpInput.value = "";
           otpInput.focus();
           msgOtp.textContent = "";
@@ -255,11 +296,61 @@
       setLoading(btnVerifyOtp, false, "تسجيل الدخول");
     });
 
+    btnRegister.addEventListener("click", async () => {
+      const name = regNameInput.value.trim();
+      const email = regEmailInput.value.trim();
+      msgRegister.textContent = "";
+      msgRegister.className = "msg";
+
+      if (!name) {
+        msgRegister.textContent = "اكتب اسمك";
+        msgRegister.classList.add("error");
+        return;
+      }
+      if (!email || !email.includes("@")) {
+        msgRegister.textContent = "اكتب إيميل صحيح";
+        msgRegister.classList.add("error");
+        return;
+      }
+
+      setLoading(btnRegister, true, "تسجيل حساب جديد");
+      try {
+        const res = await fetch(
+          `${WEB_APP_URL}?action=register&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`
+        );
+        const data = await res.json();
+
+        if (data.success) {
+          msgRegister.textContent = data.message;
+          msgRegister.classList.add("success");
+          regNameInput.value = "";
+          regEmailInput.value = "";
+        } else {
+          msgRegister.textContent = data.message || "حصل خطأ، حاول تاني";
+          msgRegister.classList.add("error");
+        }
+      } catch (e) {
+        msgRegister.textContent = "مشكلة في الاتصال، حاول تاني";
+        msgRegister.classList.add("error");
+      }
+      setLoading(btnRegister, false, "تسجيل حساب جديد");
+    });
+
     btnBack.addEventListener("click", () => {
-      stepOtp.classList.remove("active");
-      stepEmail.classList.add("active");
+      showStep(stepEmail);
       msgEmail.textContent = "";
       msgOtp.textContent = "";
+    });
+
+    showRegister.addEventListener("click", () => {
+      showStep(stepRegister);
+      msgRegister.textContent = "";
+      msgRegister.className = "msg";
+    });
+
+    btnBackFromRegister.addEventListener("click", () => {
+      showStep(stepEmail);
+      msgRegister.textContent = "";
     });
 
     otpInput.addEventListener("keydown", (e) => {
@@ -267,6 +358,9 @@
     });
     emailInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") btnSendOtp.click();
+    });
+    regEmailInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnRegister.click();
     });
   </script>
 </body>

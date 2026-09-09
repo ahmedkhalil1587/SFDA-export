@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>لوحة الأدمن - مجمع المدلوح</title>
+<title>لوحة الأدمن - SFDA Updates</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -66,6 +66,7 @@
   }
   .badge.active { background: #e5f7ec; color: #1a8a4a; }
   .badge.disabled { background: #fdecec; color: #d64545; }
+  .badge.pending { background: #fff4e0; color: #b3711a; }
   .role-admin { color: #0b5ed7; font-weight: 600; }
   button.toggle {
     padding: 7px 14px;
@@ -135,11 +136,12 @@
 
       const rows = users.map((u) => {
         const isActive = u.status === "Active";
-        const badgeClass = isActive ? "active" : "disabled";
-        const badgeText = isActive ? "مفعّل" : "موقوف";
+        const isPending = u.status === "Pending";
+        const badgeClass = isActive ? "active" : (isPending ? "pending" : "disabled");
+        const badgeText = isActive ? "مفعّل" : (isPending ? "بانتظار الموافقة" : "موقوف");
         const roleClass = u.role === "Admin" ? "role-admin" : "";
         const btnClass = isActive ? "disable" : "enable";
-        const btnText = isActive ? "إيقاف" : "تفعيل";
+        const btnText = isActive ? "إيقاف" : (isPending ? "الموافقة والتفعيل" : "تفعيل");
         const newStatus = isActive ? "Disabled" : "Active";
 
         return `
