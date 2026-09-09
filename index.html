@@ -23,6 +23,21 @@
       max-width: 420px;
       width: 90%;
     }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .topbar .user-name { font-weight: 600; color: #1a1a2e; }
+    .topbar a {
+      color: #0b5ed7;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .topbar a:hover { text-decoration: underline; }
     h1 {
       font-size: 22px;
       color: #1a1a2e;
@@ -43,6 +58,9 @@
       font-size: 16px;
       font-weight: 600;
       transition: background 0.2s;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
     }
     .btn:hover {
       background: #0a4fb5;
@@ -52,10 +70,18 @@
       font-size: 12px;
       color: #999;
     }
+    #app { display: none; }
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="app">
+    <div class="topbar">
+      <span>أهلاً، <span class="user-name" id="user-name"></span></span>
+      <span>
+        <a href="admin.html" id="admin-link" style="display:none;">لوحة الأدمن</a>
+        <a href="#" id="logout-link" style="margin-right:10px;">خروج</a>
+      </span>
+    </div>
     <h1>قائمة الأدوية البشرية المسجلة</h1>
     <p>آخر نسخة محدّثة تلقائيًا من موقع الهيئة العامة للغذاء والدواء (SFDA)</p>
     <a class="btn" href="data/SFDA_Drugs_latest.xlsx" download>
@@ -65,5 +91,48 @@
       يتم تحديث الملف تلقائيًا أول كل شهر
     </div>
   </div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbys4Ak1MaJY2-K5r3WgZ1NWiqGonafK1emuhmNLolyrAeZAe8Pfg0UocD3v21UEofpoYg/exec";
+
+    (async function guardPage() {
+      const token = localStorage.getItem("mdl_token");
+      if (!token) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=checkSession&token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+
+        if (!data.success) {
+          localStorage.removeItem("mdl_token");
+          localStorage.removeItem("mdl_user");
+          window.location.href = "login.html";
+          return;
+        }
+
+        document.getElementById("user-name").textContent = data.user.name;
+        if (data.user.role === "Admin") {
+          document.getElementById("admin-link").style.display = "inline";
+        }
+        document.getElementById("app").style.display = "block";
+      } catch (e) {
+        window.location.href = "login.html";
+      }
+    })();
+
+    document.getElementById("logout-link").addEventListener("click", async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("mdl_token");
+      if (token) {
+        try { await fetch(`${WEB_APP_URL}?action=logout&token=${encodeURIComponent(token)}`); } catch (err) {}
+      }
+      localStorage.removeItem("mdl_token");
+      localStorage.removeItem("mdl_user");
+      window.location.href = "login.html";
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>لوحة الأدمن - مجمع المدلوح</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    min-height: 100vh;
+    padding: 30px 16px;
+  }
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .topbar a {
+    color: #0b5ed7;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  h1 {
+    font-size: 20px;
+    color: #1a1a2e;
+    margin: 0 0 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th, td {
+    padding: 14px 16px;
+    text-align: right;
+    border-bottom: 1px solid #eef0f3;
+  }
+  th {
+    background: #f9fafb;
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge.active { background: #e5f7ec; color: #1a8a4a; }
+  .badge.disabled { background: #fdecec; color: #d64545; }
+  .role-admin { color: #0b5ed7; font-weight: 600; }
+  button.toggle {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  button.toggle.disable { background: #fdecec; color: #d64545; }
+  button.toggle.enable { background: #e5f7ec; color: #1a8a4a; }
+  button.toggle:disabled { opacity: 0.5; cursor: not-allowed; }
+  .msg {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+    font-size: 14px;
+  }
+  .msg.error { color: #d64545; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="index.html">→ رجوع</a>
+      <a href="#" id="logout-link">خروج</a>
+    </div>
+    <h1>إدارة اليوزرات</h1>
+    <div class="card">
+      <div id="content">
+        <div class="msg">جاري التحميل...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbys4Ak1MaJY2-K5r3WgZ1NWiqGonafK1emuhmNLolyrAeZAe8Pfg0UocD3v21UEofpoYg/exec";
+    const token = localStorage.getItem("mdl_token");
+    const content = document.getElementById("content");
+
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    async function loadUsers() {
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=listUsers&token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+
+        if (!data.success) {
+          content.innerHTML = `<div class="msg error">${data.message || "مش متاح ليك تدخل هنا"}</div>`;
+          return;
+        }
+
+        renderUsers(data.users);
+      } catch (e) {
+        content.innerHTML = `<div class="msg error">مشكلة في الاتصال، حاول تاني</div>`;
+      }
+    }
+
+    function renderUsers(users) {
+      if (!users.length) {
+        content.innerHTML = `<div class="msg">مفيش يوزرات مسجلة</div>`;
+        return;
+      }
+
+      const rows = users.map((u) => {
+        const isActive = u.status === "Active";
+        const badgeClass = isActive ? "active" : "disabled";
+        const badgeText = isActive ? "مفعّل" : "موقوف";
+        const roleClass = u.role === "Admin" ? "role-admin" : "";
+        const btnClass = isActive ? "disable" : "enable";
+        const btnText = isActive ? "إيقاف" : "تفعيل";
+        const newStatus = isActive ? "Disabled" : "Active";
+
+        return `
+          <tr data-email="${u.email}">
+            <td>${u.name}</td>
+            <td style="direction:ltr; text-align:left;">${u.email}</td>
+            <td class="${roleClass}">${u.role}</td>
+            <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+            <td>
+              <button class="toggle ${btnClass}" data-email="${u.email}" data-status="${newStatus}">
+                ${btnText}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      content.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>الاسم</th>
+              <th>الإيميل</th>
+              <th>الدور</th>
+              <th>الحالة</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+
+      document.querySelectorAll("button.toggle").forEach((btn) => {
+        btn.addEventListener("click", () => toggleUser(btn));
+      });
+    }
+
+    async function toggleUser(btn) {
+      const email = btn.dataset.email;
+      const newStatus = btn.dataset.status;
+      btn.disabled = true;
+      btn.textContent = "لحظة...";
+
+      try {
+        const res = await fetch(
+          `${WEB_APP_URL}?action=setUserStatus&token=${encodeURIComponent(token)}&targetEmail=${encodeURIComponent(email)}&status=${encodeURIComponent(newStatus)}`
+        );
+        const data = await res.json();
+
+        if (data.success) {
+          loadUsers();
+        } else {
+          alert(data.message || "حصل خطأ");
+          btn.disabled = false;
+        }
+      } catch (e) {
+        alert("مشكلة في الاتصال");
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById("logout-link").addEventListener("click", async (e) => {
+      e.preventDefault();
+      try { await fetch(`${WEB_APP_URL}?action=logout&token=${encodeURIComponent(token)}`); } catch (err) {}
+      localStorage.removeItem("mdl_token");
+      localStorage.removeItem("mdl_user");
+      window.location.href = "login.html";
+    });
+
+    loadUsers();
+  </script>
+</body>
+</html>

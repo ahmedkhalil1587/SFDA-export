@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تسجيل الدخول - مجمع المدلوح</title>
+<style>
+  :root {
+    --accent: #0b5ed7;
+    --accent-dark: #0a4fb5;
+    --ink: #1a1a2e;
+    --muted: #6b7280;
+    --error: #d64545;
+    --bg: #f4f6f8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 40px;
+    width: 90%;
+    max-width: 400px;
+  }
+  .brand {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .brand-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    margin: 0 auto 12px;
+  }
+  .brand h1 {
+    font-size: 18px;
+    color: var(--ink);
+    margin: 0;
+  }
+  .brand p {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 4px 0 0;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #e2e5ea;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    margin-bottom: 16px;
+    direction: ltr;
+    text-align: left;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button:hover { background: var(--accent-dark); }
+  button:disabled { background: #b9c6da; cursor: not-allowed; }
+  .link-btn {
+    background: none;
+    color: var(--accent);
+    font-weight: 500;
+    font-size: 13px;
+    padding: 8px;
+    margin-top: 6px;
+  }
+  .link-btn:hover { background: none; text-decoration: underline; }
+  .msg {
+    font-size: 13px;
+    text-align: center;
+    margin-top: 14px;
+    min-height: 18px;
+  }
+  .msg.error { color: var(--error); }
+  .msg.success { color: #1a8a4a; }
+  .otp-hint {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .step { display: none; }
+  .step.active { display: block; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-mark">م</div>
+      <h1>مجمع المدلوح</h1>
+      <p>نظام إدارة قوائم الأدوية</p>
+    </div>
+
+    <!-- خطوة 1: إدخال الإيميل -->
+    <div class="step active" id="step-email">
+      <label for="email">الإيميل</label>
+      <input type="email" id="email" placeholder="example@domain.com" autocomplete="email" />
+      <button id="btn-send-otp">إرسال رمز التحقق</button>
+      <div class="msg" id="msg-email"></div>
+    </div>
+
+    <!-- خطوة 2: إدخال رمز التحقق -->
+    <div class="step" id="step-otp">
+      <p class="otp-hint" id="otp-sent-to"></p>
+      <label for="otp">رمز التحقق (6 أرقام)</label>
+      <input type="text" id="otp" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+      <button id="btn-verify-otp">تسجيل الدخول</button>
+      <button class="link-btn" id="btn-back">تغيير الإيميل</button>
+      <div class="msg" id="msg-otp"></div>
+    </div>
+  </div>
+
+  <script>
+    // ==== غيّري الرابط ده بالـ Web App URL بتاعك ====
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbys4Ak1MaJY2-K5r3WgZ1NWiqGonafK1emuhmNLolyrAeZAe8Pfg0UocD3v21UEofpoYg/exec";
+
+    const stepEmail = document.getElementById("step-email");
+    const stepOtp = document.getElementById("step-otp");
+    const emailInput = document.getElementById("email");
+    const otpInput = document.getElementById("otp");
+    const msgEmail = document.getElementById("msg-email");
+    const msgOtp = document.getElementById("msg-otp");
+    const otpSentTo = document.getElementById("otp-sent-to");
+    const btnSendOtp = document.getElementById("btn-send-otp");
+    const btnVerifyOtp = document.getElementById("btn-verify-otp");
+    const btnBack = document.getElementById("btn-back");
+
+    let currentEmail = "";
+
+    // لو فيه جلسة شغالة أصلاً، نتجاوز صفحة الدخول
+    (async function checkExistingSession() {
+      const token = localStorage.getItem("mdl_token");
+      if (!token) return;
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=checkSession&token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = "index.html";
+        }
+      } catch (e) { /* تجاهل، سيبها في صفحة الدخول */ }
+    })();
+
+    function setLoading(button, loading, originalText) {
+      button.disabled = loading;
+      button.textContent = loading ? "لحظة..." : originalText;
+    }
+
+    btnSendOtp.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      msgEmail.textContent = "";
+      msgEmail.className = "msg";
+
+      if (!email || !email.includes("@")) {
+        msgEmail.textContent = "اكتب إيميل صحيح";
+        msgEmail.classList.add("error");
+        return;
+      }
+
+      setLoading(btnSendOtp, true, "إرسال رمز التحقق");
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=requestOtp&email=${encodeURIComponent(email)}`);
+        const data = await res.json();
+
+        if (data.success) {
+          currentEmail = email;
+          otpSentTo.textContent = `بعتنا رمز التحقق على: ${email}`;
+          stepEmail.classList.remove("active");
+          stepOtp.classList.add("active");
+          otpInput.value = "";
+          otpInput.focus();
+          msgOtp.textContent = "";
+          msgOtp.className = "msg";
+        } else {
+          msgEmail.textContent = data.message || "حصل خطأ، حاول تاني";
+          msgEmail.classList.add("error");
+        }
+      } catch (e) {
+        msgEmail.textContent = "مشكلة في الاتصال، تأكد من الإنترنت وحاول تاني";
+        msgEmail.classList.add("error");
+      }
+      setLoading(btnSendOtp, false, "إرسال رمز التحقق");
+    });
+
+    btnVerifyOtp.addEventListener("click", async () => {
+      const code = otpInput.value.trim();
+      msgOtp.textContent = "";
+      msgOtp.className = "msg";
+
+      if (!code || code.length !== 6) {
+        msgOtp.textContent = "اكتب الرمز المكوّن من 6 أرقام";
+        msgOtp.classList.add("error");
+        return;
+      }
+
+      setLoading(btnVerifyOtp, true, "تسجيل الدخول");
+      try {
+        const res = await fetch(
+          `${WEB_APP_URL}?action=verifyOtp&email=${encodeURIComponent(currentEmail)}&code=${encodeURIComponent(code)}`
+        );
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem("mdl_token", data.token);
+          localStorage.setItem("mdl_user", JSON.stringify(data.user));
+          msgOtp.textContent = "تم الدخول، بنحوّلك...";
+          msgOtp.classList.add("success");
+          setTimeout(() => { window.location.href = "index.html"; }, 600);
+        } else {
+          msgOtp.textContent = data.message || "الرمز غلط";
+          msgOtp.classList.add("error");
+        }
+      } catch (e) {
+        msgOtp.textContent = "مشكلة في الاتصال، حاول تاني";
+        msgOtp.classList.add("error");
+      }
+      setLoading(btnVerifyOtp, false, "تسجيل الدخول");
+    });
+
+    btnBack.addEventListener("click", () => {
+      stepOtp.classList.remove("active");
+      stepEmail.classList.add("active");
+      msgEmail.textContent = "";
+      msgOtp.textContent = "";
+    });
+
+    otpInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnVerifyOtp.click();
+    });
+    emailInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnSendOtp.click();
+    });
+  </script>
+</body>
+</html>
