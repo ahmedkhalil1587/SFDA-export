@@ -1,0 +1,37 @@
+name: Scrape SFDA Drugs List
+
+on:
+  # يشتغل تلقائيًا يوم 1 من كل شهر الساعة 3 صباحًا (توقيت UTC)
+  schedule:
+    - cron: "0 3 1 * *"
+  # يسمح كمان بتشغيله يدويًا من تبويب Actions في GitHub وقت ما تحب
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        run: python sfda_drugs_scraper.py
+
+      - name: Commit and push updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --staged --quiet || git commit -m "تحديث بيانات الأدوية - $(date +'%Y-%m-%d')"
+          git push
