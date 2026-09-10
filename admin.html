@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>لوحة الأدمن - SFDA Updates</title>
+<link rel="icon" type="image/jpeg" href="assets/integriox-badge.jpeg" />
 <style>
   * { box-sizing: border-box; }
   body {
@@ -87,10 +88,29 @@
     font-size: 14px;
   }
   .msg.error { color: #d64545; }
+  .brand-header {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .brand-header img {
+    max-width: 110px;
+    width: 100%;
+    height: auto;
+  }
+  .footer-brand {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 11px;
+    color: #b8bfc9;
+    letter-spacing: 0.3px;
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="brand-header">
+      <img src="assets/integriox-logo-light.jpeg" alt="integriox" />
+    </div>
     <div class="topbar">
       <a href="index.html">→ رجوع</a>
       <a href="#" id="logout-link">خروج</a>
@@ -102,6 +122,8 @@
       </div>
     </div>
   </div>
+
+  <div class="footer-brand">Powered by integriox</div>
 
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbys4Ak1MaJY2-K5r3WgZ1NWiqGonafK1emuhmNLolyrAeZAe8Pfg0UocD3v21UEofpoYg/exec";
