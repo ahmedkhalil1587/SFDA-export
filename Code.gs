@@ -24,7 +24,8 @@ const CONFIG = {
   OTP_EXPIRY_MINUTES: 10,
   SESSION_EXPIRY_DAYS: 7,
   MAX_OTP_ATTEMPTS: 5,
-  EMAIL_SENDER_NAME: "SFDA Updates",
+  EMAIL_SENDER_NAME: "integriox",
+  SENDER_EMAIL: "integriox@gmail.com",
 };
 
 // ---------------------- نقطة الدخول (Web App) ----------------------
@@ -104,7 +105,7 @@ function generateOtpCode() {
 }
 
 function sendOtpEmail(email, name, otp) {
-  const subject = "رمز تسجيل الدخول - " + CONFIG.EMAIL_SENDER_NAME;
+  const subject = "رمز تسجيل الدخول - SFDA Updates";
   const body =
     "مرحبًا " + name + "،\n\n" +
     "رمز تسجيل الدخول بتاعك هو: " + otp + "\n\n" +
@@ -112,10 +113,9 @@ function sendOtpEmail(email, name, otp) {
     "لو ما طلبتش تسجيل دخول، تجاهل الإيميل ده.\n\n" +
     CONFIG.EMAIL_SENDER_NAME;
 
-  MailApp.sendEmail({
-    to: email,
-    subject: subject,
-    body: body,
+  GmailApp.sendEmail(email, subject, body, {
+    name: CONFIG.EMAIL_SENDER_NAME,
+    from: CONFIG.SENDER_EMAIL,
   });
 }
 
