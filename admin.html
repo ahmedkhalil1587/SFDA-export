@@ -6,17 +6,41 @@
 <title>لوحة الأدمن - SFDA Updates</title>
 <link rel="icon" type="image/jpeg" href="assets/integriox-badge.jpeg" />
 <style>
+  :root {
+    --accent: #0b5ed7;
+    --ink: #171923;
+    --muted: #6b7280;
+    --border: #e6e8ec;
+  }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-    background: #f4f6f8;
     margin: 0;
+    background:
+      radial-gradient(1100px 500px at 15% -10%, #eaf2fd 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 110%, #eef1f6 0%, transparent 55%),
+      #f6f7f9;
     min-height: 100vh;
-    padding: 30px 16px;
+    padding: 40px 16px;
+  }
+  .page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .wrap {
-    max-width: 780px;
-    margin: 0 auto;
+    max-width: 800px;
+    width: 100%;
+  }
+  .brand-header {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .brand-header img {
+    max-width: 116px;
+    width: 100%;
+    height: auto;
   }
   .topbar {
     display: flex;
@@ -25,20 +49,22 @@
     margin-bottom: 20px;
   }
   .topbar a {
-    color: #0b5ed7;
+    color: var(--accent);
     text-decoration: none;
     font-weight: 600;
     font-size: 14px;
   }
+  .topbar a:hover { text-decoration: underline; }
   h1 {
     font-size: 20px;
-    color: #1a1a2e;
+    color: var(--ink);
     margin: 0 0 20px;
   }
   .card {
     background: #fff;
+    border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 12px 32px -8px rgba(16,24,40,0.10);
     overflow: hidden;
   }
   table {
@@ -47,83 +73,80 @@
     font-size: 14px;
   }
   th, td {
-    padding: 14px 16px;
+    padding: 14px 18px;
     text-align: right;
-    border-bottom: 1px solid #eef0f3;
+    border-bottom: 1px solid var(--border);
   }
   th {
-    background: #f9fafb;
-    color: #6b7280;
-    font-weight: 600;
-    font-size: 12px;
+    background: #fbfbfc;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
   }
   tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #fbfbfc; }
   .badge {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 3px 11px;
     border-radius: 999px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
   }
   .badge.active { background: #e5f7ec; color: #1a8a4a; }
   .badge.disabled { background: #fdecec; color: #d64545; }
   .badge.pending { background: #fff4e0; color: #b3711a; }
-  .role-admin { color: #0b5ed7; font-weight: 600; }
+  .role-admin { color: var(--accent); font-weight: 700; }
   button.toggle {
     padding: 7px 14px;
     border-radius: 8px;
     border: none;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     font-family: inherit;
+    transition: opacity 0.15s;
   }
+  button.toggle:hover { opacity: 0.85; }
   button.toggle.disable { background: #fdecec; color: #d64545; }
   button.toggle.enable { background: #e5f7ec; color: #1a8a4a; }
   button.toggle:disabled { opacity: 0.5; cursor: not-allowed; }
   .msg {
     text-align: center;
-    padding: 40px 20px;
-    color: #6b7280;
+    padding: 44px 20px;
+    color: var(--muted);
     font-size: 14px;
   }
   .msg.error { color: #d64545; }
-  .brand-header {
-    text-align: center;
-    margin-bottom: 14px;
-  }
-  .brand-header img {
-    max-width: 110px;
-    width: 100%;
-    height: auto;
-  }
   .footer-brand {
     text-align: center;
-    margin-top: 18px;
-    font-size: 11px;
-    color: #b8bfc9;
-    letter-spacing: 0.3px;
+    margin-top: 22px;
+    font-size: 11.5px;
+    color: #a7adb8;
+    letter-spacing: 0.2px;
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="brand-header">
-      <img src="assets/integriox-logo-light.jpeg" alt="integriox" />
-    </div>
-    <div class="topbar">
-      <a href="index.html">→ رجوع</a>
-      <a href="#" id="logout-link">خروج</a>
-    </div>
-    <h1>إدارة اليوزرات</h1>
-    <div class="card">
-      <div id="content">
-        <div class="msg">جاري التحميل...</div>
+  <div class="page">
+    <div class="wrap">
+      <div class="brand-header">
+        <img src="assets/integriox-logo-light.jpeg" alt="integriox" />
+      </div>
+      <div class="topbar">
+        <a href="index.html">→ رجوع</a>
+        <a href="#" id="logout-link">خروج</a>
+      </div>
+      <h1>إدارة اليوزرات</h1>
+      <div class="card">
+        <div id="content">
+          <div class="msg">جاري التحميل...</div>
+        </div>
       </div>
     </div>
+    <div class="footer-brand">Powered by integriox</div>
   </div>
-
-  <div class="footer-brand">Powered by integriox</div>
 
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyTCzDgAMvsTS-JKRHl9CU6o1HuqKWbHgaa2Cdd-FnDHlV0wAHmkeRsWzrieg8a2VUt/exec";

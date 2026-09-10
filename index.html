@@ -6,139 +6,166 @@
   <title>SFDA Updates</title>
   <link rel="icon" type="image/jpeg" href="assets/integriox-badge.jpeg" />
   <style>
+    :root {
+      --accent: #0b5ed7;
+      --accent-dark: #0a4fb5;
+      --accent-soft: #eaf2fd;
+      --ink: #171923;
+      --muted: #6b7280;
+      --border: #e6e8ec;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
       font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-      background: #f4f6f8;
       margin: 0;
+      background:
+        radial-gradient(1100px 500px at 15% -10%, #eaf2fd 0%, transparent 60%),
+        radial-gradient(900px 500px at 100% 110%, #eef1f6 0%, transparent 55%),
+        #f6f7f9;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      padding: 24px;
+    }
+    .page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 460px;
     }
     .card {
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      padding: 40px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 12px 32px -8px rgba(16,24,40,0.12);
+      padding: 36px 34px 30px;
+      width: 100%;
       text-align: center;
-      max-width: 420px;
-      width: 90%;
+    }
+    .brand-header { margin-bottom: 8px; }
+    .brand-header img {
+      max-width: 150px;
+      width: 100%;
+      height: auto;
+    }
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 18px 0 22px;
     }
     .topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 4px;
       font-size: 13px;
-      color: #6b7280;
+      color: var(--muted);
     }
-    .topbar .user-name { font-weight: 600; color: #1a1a2e; }
+    .topbar .user-name { font-weight: 700; color: var(--ink); }
     .topbar a {
-      color: #0b5ed7;
+      color: var(--accent);
       text-decoration: none;
       font-weight: 600;
     }
     .topbar a:hover { text-decoration: underline; }
     h1 {
-      font-size: 22px;
-      color: #1a1a2e;
-      margin-bottom: 8px;
+      font-size: 19px;
+      color: var(--ink);
+      margin: 0 0 6px;
     }
-    p {
-      color: #666;
-      font-size: 14px;
+    p.lead {
+      color: var(--muted);
+      font-size: 13.5px;
       margin-bottom: 24px;
     }
+    .source-block {
+      margin-bottom: 20px;
+      padding: 18px;
+      background: #fbfbfc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: right;
+    }
+    .source-block:last-of-type { margin-bottom: 0; }
+    .source-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
     .btn {
-      display: inline-block;
-      background: #0b5ed7;
+      display: block;
+      width: 100%;
+      background: var(--accent);
       color: #fff;
       text-decoration: none;
-      padding: 14px 28px;
+      text-align: center;
+      padding: 12px 20px;
       border-radius: 10px;
-      font-size: 16px;
+      font-size: 14.5px;
       font-weight: 600;
-      transition: background 0.2s;
       border: none;
       cursor: pointer;
       font-family: inherit;
+      transition: background 0.15s, transform 0.05s;
     }
-    .btn:hover {
-      background: #0a4fb5;
-    }
+    .btn:hover { background: var(--accent-dark); }
+    .btn:active { transform: translateY(1px); }
     .meta {
-      margin-top: 20px;
+      margin-top: 12px;
       font-size: 12px;
-      color: #999;
-    }
-    .source-block {
-      margin-bottom: 22px;
-      padding-bottom: 22px;
-      border-bottom: 1px solid #eef0f3;
-    }
-    .source-block:last-of-type {
-      border-bottom: none;
-      padding-bottom: 0;
-      margin-bottom: 0;
-    }
-    .source-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #1a1a2e;
-      margin-bottom: 10px;
-    }
-    .brand-header {
-      text-align: center;
-      margin-bottom: 18px;
-    }
-    .brand-header img {
-      max-width: 140px;
-      width: 100%;
-      height: auto;
+      color: var(--muted);
     }
     .footer-brand {
       text-align: center;
-      margin-top: 18px;
-      font-size: 11px;
-      color: #b8bfc9;
-      letter-spacing: 0.3px;
+      margin-top: 22px;
+      font-size: 11.5px;
+      color: #a7adb8;
+      letter-spacing: 0.2px;
     }
     #app { display: none; }
   </style>
 </head>
 <body>
-  <div class="card" id="app">
-    <div class="brand-header">
-      <img src="assets/integriox-logo-light.jpeg" alt="integriox" />
-    </div>
-    <div class="topbar">
-      <span>أهلاً، <span class="user-name" id="user-name"></span></span>
-      <span>
-        <a href="admin.html" id="admin-link" style="display:none;">لوحة الأدمن</a>
-        <a href="#" id="logout-link" style="margin-right:10px;">خروج</a>
-      </span>
-    </div>
-    <h1>قائمة الأدوية البشرية المسجلة</h1>
-    <p>نسخ محدّثة تلقائيًا من موقعي الهيئة العامة للغذاء والدواء (SFDA)</p>
+  <div class="page">
+    <div class="card" id="app">
+      <div class="brand-header">
+        <img src="assets/integriox-logo-light.jpeg" alt="integriox" />
+      </div>
+      <div class="topbar">
+        <span>أهلاً، <span class="user-name" id="user-name"></span></span>
+        <span>
+          <a href="admin.html" id="admin-link" style="display:none;">لوحة الأدمن</a>
+          <a href="#" id="logout-link" style="margin-right:10px;">خروج</a>
+        </span>
+      </div>
+      <div class="divider"></div>
 
-    <div class="source-block">
-      <div class="source-title">الموقع القديم (oldsfda.sfda.gov.sa)</div>
-      <a class="btn" href="data/SFDA_Drugs_latest.xlsx" download id="download-btn">
-        تحميل النسخة (Excel)
-      </a>
-      <div class="meta" id="last-updated">جاري التحميل...</div>
+      <h1>قائمة الأدوية البشرية المسجلة</h1>
+      <p class="lead">نسخ محدّثة تلقائيًا من موقعي الهيئة العامة للغذاء والدواء (SFDA)</p>
+
+      <div class="source-block">
+        <div class="source-title">الموقع القديم (oldsfda.sfda.gov.sa)</div>
+        <a class="btn" href="data/SFDA_Drugs_latest.xlsx" download id="download-btn">
+          تحميل النسخة (Excel)
+        </a>
+        <div class="meta" id="last-updated">جاري التحميل...</div>
+      </div>
+
+      <div class="source-block">
+        <div class="source-title">الموقع الجديد (sfda.gov.sa)</div>
+        <a class="btn" href="data/SFDA_Drugs_New_latest.xlsx" download id="download-btn-new">
+          تحميل النسخة (Excel)
+        </a>
+        <div class="meta" id="last-updated-new">جاري التحميل...</div>
+      </div>
     </div>
 
-    <div class="source-block">
-      <div class="source-title">الموقع الجديد (sfda.gov.sa)</div>
-      <a class="btn" href="data/SFDA_Drugs_New_latest.xlsx" download id="download-btn-new">
-        تحميل النسخة (Excel)
-      </a>
-      <div class="meta" id="last-updated-new">جاري التحميل...</div>
-    </div>
+    <div class="footer-brand">Powered by integriox</div>
   </div>
-
-  <div class="footer-brand">Powered by integriox</div>
 
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyTCzDgAMvsTS-JKRHl9CU6o1HuqKWbHgaa2Cdd-FnDHlV0wAHmkeRsWzrieg8a2VUt/exec";
