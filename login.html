@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تسجيل الدخول - SFDA Updates</title>
+<link rel="icon" type="image/jpeg" href="assets/integriox-badge.jpeg" />
+<style>
+  :root {
+    --accent: #0b5ed7;
+    --accent-dark: #0a4fb5;
+    --accent-soft: #eaf2fd;
+    --ink: #171923;
+    --muted: #6b7280;
+    --border: #e6e8ec;
+    --error: #d64545;
+    --success: #1a8a4a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+  }
+  body {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    margin: 0;
+    background:
+      radial-gradient(1100px 500px at 15% -10%, #eaf2fd 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 110%, #eef1f6 0%, transparent 55%),
+      #f6f7f9;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 12px 32px -8px rgba(16,24,40,0.12);
+    padding: 36px 34px 30px;
+    width: 100%;
+  }
+  .brand {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .brand img {
+    max-width: 176px;
+    width: 100%;
+    height: auto;
+    margin-bottom: 16px;
+  }
+  .brand .product-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: 0.2px;
+  }
+  .brand p.tagline {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 3px 0 0;
+  }
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 22px;
+  }
+  label {
+    display: block;
+    font-size: 12.5px;
+    color: var(--ink);
+    margin-bottom: 7px;
+    font-weight: 600;
+  }
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14.5px;
+    font-family: inherit;
+    margin-bottom: 16px;
+    direction: ltr;
+    text-align: left;
+    color: var(--ink);
+    background: #fbfbfc;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  input::placeholder { color: #a7adb8; }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 3.5px var(--accent-soft);
+  }
+  button {
+    width: 100%;
+    padding: 12.5px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  button:hover { background: var(--accent-dark); }
+  button:active { transform: translateY(1px); }
+  button:disabled { background: #c4cede; cursor: not-allowed; }
+  .link-btn {
+    background: none;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px;
+    margin-top: 4px;
+  }
+  .link-btn:hover { background: none; text-decoration: underline; }
+  .msg {
+    font-size: 13px;
+    text-align: center;
+    margin-top: 14px;
+    min-height: 18px;
+  }
+  .msg.error { color: var(--error); }
+  .msg.success { color: var(--success); }
+  .otp-hint {
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .step { display: none; }
+  .step.active { display: block; }
+  .switch-row {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .switch-row a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .switch-row a:hover { text-decoration: underline; }
+  .footer-brand {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 11.5px;
+    color: #a7adb8;
+    letter-spacing: 0.2px;
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="brand">
+        <img src="assets/integriox-logo-light.jpeg" alt="integriox - integrated solutions" />
+        <p class="product-name">SFDA Updates</p>
+        <p class="tagline">نظام إدارة قوائم الأدوية</p>
+      </div>
+      <div class="divider"></div>
+
+      <!-- خطوة 1: إدخال الإيميل -->
+      <div class="step active" id="step-email">
+        <label for="email">الإيميل</label>
+        <input type="email" id="email" placeholder="example@domain.com" autocomplete="email" />
+        <button id="btn-send-otp">إرسال رمز التحقق</button>
+        <div class="msg" id="msg-email"></div>
+        <div class="switch-row">
+          مفيش حساب؟ <a id="show-register">سجّل حساب جديد</a>
+        </div>
+      </div>
+
+      <!-- خطوة 2: إدخال رمز التحقق -->
+      <div class="step" id="step-otp">
+        <p class="otp-hint" id="otp-sent-to"></p>
+        <label for="otp">رمز التحقق (6 أرقام)</label>
+        <input type="text" id="otp" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+        <button id="btn-verify-otp">تسجيل الدخول</button>
+        <button class="link-btn" id="btn-back">تغيير الإيميل</button>
+        <div class="msg" id="msg-otp"></div>
+      </div>
+
+      <!-- خطوة 3: تسجيل حساب جديد -->
+      <div class="step" id="step-register">
+        <label for="reg-name">الاسم</label>
+        <input type="text" id="reg-name" placeholder="اسمك الكامل" autocomplete="name" />
+        <label for="reg-email">الإيميل</label>
+        <input type="email" id="reg-email" placeholder="example@domain.com" autocomplete="email" />
+        <button id="btn-register">تسجيل حساب جديد</button>
+        <button class="link-btn" id="btn-back-from-register">رجوع لتسجيل الدخول</button>
+        <div class="msg" id="msg-register"></div>
+      </div>
+    </div>
+
+    <div class="footer-brand">Powered by integriox</div>
+  </div>
+
+  <script>
+    // ==== غيّري الرابط ده بالـ Web App URL بتاعك ====
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyTCzDgAMvsTS-JKRHl9CU6o1HuqKWbHgaa2Cdd-FnDHlV0wAHmkeRsWzrieg8a2VUt/exec";
+
+    const stepEmail = document.getElementById("step-email");
+    const stepOtp = document.getElementById("step-otp");
+    const stepRegister = document.getElementById("step-register");
+
+    const emailInput = document.getElementById("email");
+    const otpInput = document.getElementById("otp");
+    const regNameInput = document.getElementById("reg-name");
+    const regEmailInput = document.getElementById("reg-email");
+
+    const msgEmail = document.getElementById("msg-email");
+    const msgOtp = document.getElementById("msg-otp");
+    const msgRegister = document.getElementById("msg-register");
+    const otpSentTo = document.getElementById("otp-sent-to");
+
+    const btnSendOtp = document.getElementById("btn-send-otp");
+    const btnVerifyOtp = document.getElementById("btn-verify-otp");
+    const btnBack = document.getElementById("btn-back");
+    const btnRegister = document.getElementById("btn-register");
+    const showRegister = document.getElementById("show-register");
+    const btnBackFromRegister = document.getElementById("btn-back-from-register");
+
+    let currentEmail = "";
+
+    function showStep(step) {
+      [stepEmail, stepOtp, stepRegister].forEach((s) => s.classList.remove("active"));
+      step.classList.add("active");
+    }
+
+    (async function checkExistingSession() {
+      const token = localStorage.getItem("mdl_token");
+      if (!token) return;
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=checkSession&token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = "index.html";
+        }
+      } catch (e) { /* تجاهل، سيبها في صفحة الدخول */ }
+    })();
+
+    function setLoading(button, loading, originalText) {
+      button.disabled = loading;
+      button.textContent = loading ? "لحظة..." : originalText;
+    }
+
+    btnSendOtp.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      msgEmail.textContent = "";
+      msgEmail.className = "msg";
+
+      if (!email || !email.includes("@")) {
+        msgEmail.textContent = "اكتب إيميل صحيح";
+        msgEmail.classList.add("error");
+        return;
+      }
+
+      setLoading(btnSendOtp, true, "إرسال رمز التحقق");
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=requestOtp&email=${encodeURIComponent(email)}`);
+        const data = await res.json();
+
+        if (data.success) {
+          currentEmail = email;
+          otpSentTo.textContent = `بعتنا رمز التحقق على: ${email}`;
+          showStep(stepOtp);
+          otpInput.value = "";
+          otpInput.focus();
+          msgOtp.textContent = "";
+          msgOtp.className = "msg";
+        } else {
+          msgEmail.textContent = data.message || "حصل خطأ، حاول تاني";
+          msgEmail.classList.add("error");
+        }
+      } catch (e) {
+        msgEmail.textContent = "مشكلة في الاتصال، تأكد من الإنترنت وحاول تاني";
+        msgEmail.classList.add("error");
+      }
+      setLoading(btnSendOtp, false, "إرسال رمز التحقق");
+    });
+
+    btnVerifyOtp.addEventListener("click", async () => {
+      const code = otpInput.value.trim();
+      msgOtp.textContent = "";
+      msgOtp.className = "msg";
+
+      if (!code || code.length !== 6) {
+        msgOtp.textContent = "اكتب الرمز المكوّن من 6 أرقام";
+        msgOtp.classList.add("error");
+        return;
+      }
+
+      setLoading(btnVerifyOtp, true, "تسجيل الدخول");
+      try {
+        const res = await fetch(
+          `${WEB_APP_URL}?action=verifyOtp&email=${encodeURIComponent(currentEmail)}&code=${encodeURIComponent(code)}`
+        );
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem("mdl_token", data.token);
+          localStorage.setItem("mdl_user", JSON.stringify(data.user));
+          msgOtp.textContent = "تم الدخول، بنحوّلك...";
+          msgOtp.classList.add("success");
+          setTimeout(() => { window.location.href = "index.html"; }, 600);
+        } else {
+          msgOtp.textContent = data.message || "الرمز غلط";
+          msgOtp.classList.add("error");
+        }
+      } catch (e) {
+        msgOtp.textContent = "مشكلة في الاتصال، حاول تاني";
+        msgOtp.classList.add("error");
+      }
+      setLoading(btnVerifyOtp, false, "تسجيل الدخول");
+    });
+
+    btnRegister.addEventListener("click", async () => {
+      const name = regNameInput.value.trim();
+      const email = regEmailInput.value.trim();
+      msgRegister.textContent = "";
+      msgRegister.className = "msg";
+
+      if (!name) {
+        msgRegister.textContent = "اكتب اسمك";
+        msgRegister.classList.add("error");
+        return;
+      }
+      if (!email || !email.includes("@")) {
+        msgRegister.textContent = "اكتب إيميل صحيح";
+        msgRegister.classList.add("error");
+        return;
+      }
+
+      setLoading(btnRegister, true, "تسجيل حساب جديد");
+      try {
+        const res = await fetch(
+          `${WEB_APP_URL}?action=register&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`
+        );
+        const data = await res.json();
+
+        if (data.success) {
+          msgRegister.textContent = data.message;
+          msgRegister.classList.add("success");
+          regNameInput.value = "";
+          regEmailInput.value = "";
+        } else {
+          msgRegister.textContent = data.message || "حصل خطأ، حاول تاني";
+          msgRegister.classList.add("error");
+        }
+      } catch (e) {
+        msgRegister.textContent = "مشكلة في الاتصال، حاول تاني";
+        msgRegister.classList.add("error");
+      }
+      setLoading(btnRegister, false, "تسجيل حساب جديد");
+    });
+
+    btnBack.addEventListener("click", () => {
+      showStep(stepEmail);
+      msgEmail.textContent = "";
+      msgOtp.textContent = "";
+    });
+
+    showRegister.addEventListener("click", () => {
+      showStep(stepRegister);
+      msgRegister.textContent = "";
+      msgRegister.className = "msg";
+    });
+
+    btnBackFromRegister.addEventListener("click", () => {
+      showStep(stepEmail);
+      msgRegister.textContent = "";
+    });
+
+    otpInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnVerifyOtp.click();
+    });
+    emailInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnSendOtp.click();
+    });
+    regEmailInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnRegister.click();
+    });
+  </script>
+</body>
+</html>
