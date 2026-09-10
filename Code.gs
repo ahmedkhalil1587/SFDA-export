@@ -1,6 +1,6 @@
 /**
  * ============================================================
- * نظام تسجيل الدخول بـ OTP - مجمع المدلوح
+ * نظام تسجيل الدخول بـ OTP - SFDA Updates
  * ============================================================
  * الشيتات المستخدمة (لازم تكون بنفس الأسماء دي بالظبط):
  *   Users      : UserID | Name | Email | Role | Status | CreatedAt | LastLogin
@@ -104,7 +104,7 @@ function generateOtpCode() {
 }
 
 function sendOtpEmail(email, name, otp) {
-  const subject = "رمز تسجيل الدخول - مجمع المدلوح";
+  const subject = "رمز تسجيل الدخول - " + CONFIG.EMAIL_SENDER_NAME;
   const body =
     "مرحبًا " + name + "،\n\n" +
     "رمز تسجيل الدخول بتاعك هو: " + otp + "\n\n" +

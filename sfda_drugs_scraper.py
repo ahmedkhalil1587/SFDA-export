@@ -200,6 +200,14 @@ def main():
     df.to_excel(dated_filename, index=False, engine="openpyxl")
     df.to_excel(latest_filename, index=False, engine="openpyxl")
 
+    metadata = {
+        "date": today_str,
+        "count": len(df),
+        "datedFileName": f"SFDA_Drugs_{today_str}.xlsx",
+    }
+    with open(os.path.join(output_dir, "last_updated.json"), "w", encoding="utf-8") as f:
+        json.dump(metadata, f, ensure_ascii=False)
+
     print(f"\n[✓] تم! اتحفظ ملفين:")
     print(f"    - نسخة بتاريخ اليوم: {dated_filename}")
     print(f"    - نسخة ثابتة (للرابط في الموقع): {latest_filename}")

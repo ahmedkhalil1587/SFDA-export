@@ -84,10 +84,10 @@
     </div>
     <h1>قائمة الأدوية البشرية المسجلة</h1>
     <p>آخر نسخة محدّثة تلقائيًا من موقع الهيئة العامة للغذاء والدواء (SFDA)</p>
-    <a class="btn" href="data/SFDA_Drugs_latest.xlsx" download>
+    <a class="btn" href="data/SFDA_Drugs_latest.xlsx" download id="download-btn">
       تحميل آخر نسخة (Excel)
     </a>
-    <div class="meta">
+    <div class="meta" id="last-updated">
       يتم تحديث الملف تلقائيًا أول كل شهر
     </div>
   </div>
@@ -118,10 +118,26 @@
           document.getElementById("admin-link").style.display = "inline";
         }
         document.getElementById("app").style.display = "block";
+        loadLastUpdated();
       } catch (e) {
         window.location.href = "login.html";
       }
     })();
+
+    async function loadLastUpdated() {
+      try {
+        const res = await fetch(`data/last_updated.json?t=${Date.now()}`);
+        const meta = await res.json();
+        document.getElementById("last-updated").textContent =
+          `آخر تحديث: ${meta.date} — عدد الأدوية: ${meta.count.toLocaleString("ar-EG")}`;
+
+        const downloadBtn = document.getElementById("download-btn");
+        downloadBtn.href = `data/${meta.datedFileName}`;
+        downloadBtn.setAttribute("download", meta.datedFileName);
+      } catch (e) {
+        // لو الملف مش موجود لسه (أول تشغيلة ما خلصتش)، سيبي النص الافتراضي
+      }
+    }
 
     document.getElementById("logout-link").addEventListener("click", async (e) => {
       e.preventDefault();
