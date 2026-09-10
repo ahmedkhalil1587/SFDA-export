@@ -24,8 +24,10 @@ import sys
 import os
 import json
 import re
+import threading
 from datetime import datetime
 from urllib.parse import urljoin
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 from bs4 import BeautifulSoup
@@ -43,9 +45,19 @@ HEADERS = {
 }
 
 LIST_DELAY_SECONDS = 0.6
-DETAILS_DELAY_SECONDS = 0.3
+DETAILS_WORKERS = 12
+DETAILS_REQUEST_TIMEOUT = 20
 MAX_EMPTY_RETRIES = 2
 FETCH_DETAILS = True  # لو حبيت توقف مرحلة التفاصيل مؤقتًا، خليها False
+
+_thread_local = threading.local()
+
+
+def get_thread_session() -> requests.Session:
+    """كل Thread بياخد نسخة requests.Session خاصة بيه (أأمن من مشاركة نفس الـ session بين كذا Thread)."""
+    if not hasattr(_thread_local, "session"):
+        _thread_local.session = requests.Session()
+    return _thread_local.session
 
 
 def get_total_pages(session: requests.Session):
@@ -154,29 +166,42 @@ def parse_details_page(html: str) -> dict:
     return details
 
 
-def enrich_with_details(session: requests.Session, rows: list) -> list:
+def fetch_one_detail(row: dict) -> tuple:
+    """يجيب تفاصيل دواء واحد. بيرجّع (نجح؟, الصف بعد التحديث)."""
+    details_url = row.get("DetailsURL", "")
+    if not details_url:
+        return True, row
+
+    full_url = urljoin(BASE_URL, details_url)
+    session = get_thread_session()
+    try:
+        resp = session.get(full_url, headers=HEADERS, timeout=DETAILS_REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        details = parse_details_page(resp.text)
+        row.update(details)
+        return True, row
+    except requests.RequestException:
+        return False, row
+
+
+def enrich_with_details(rows: list) -> list:
     total = len(rows)
-    print(f"\nبنجيب تفاصيل كل دواء لوحده ({total} دواء)...")
+    print(f"\nبنجيب تفاصيل كل دواء لوحده ({total} دواء) - {DETAILS_WORKERS} طلبات متوازية...")
 
     fail_count = 0
-    for i, row in enumerate(rows, start=1):
-        details_url = row.get("DetailsURL", "")
-        if not details_url:
-            continue
+    done_count = 0
 
-        full_url = urljoin(BASE_URL, details_url)
-        try:
-            resp = session.get(full_url, headers=HEADERS, timeout=30)
-            resp.raise_for_status()
-            details = parse_details_page(resp.text)
-            row.update(details)
-        except requests.RequestException:
-            fail_count += 1
+    with ThreadPoolExecutor(max_workers=DETAILS_WORKERS) as executor:
+        futures = [executor.submit(fetch_one_detail, row) for row in rows]
 
-        if i % 200 == 0 or i == total:
-            print(f"[+] {i}/{total} (فشل حتى الآن: {fail_count})")
+        for future in as_completed(futures):
+            ok, _ = future.result()
+            done_count += 1
+            if not ok:
+                fail_count += 1
 
-        time.sleep(DETAILS_DELAY_SECONDS)
+            if done_count % 500 == 0 or done_count == total:
+                print(f"[+] {done_count}/{total} (فشل حتى الآن: {fail_count})")
 
     if fail_count:
         print(f"[!] فشلنا في جلب تفاصيل {fail_count} دواء من إجمالي {total} (سيبناهم بالبيانات الأساسية بس).")
@@ -186,7 +211,6 @@ def enrich_with_details(session: requests.Session, rows: list) -> list:
 
 def main():
     print("بدأنا نسحب بيانات الأدوية من الموقع الجديد لـ SFDA...\n")
-    session = requests.Session()
 
     rows = scrape_list()
     if not rows:
@@ -207,7 +231,7 @@ def main():
         print(f"[i] شلنا {len(rows) - len(unique_rows)} صف مكرر من القائمة.")
 
     if FETCH_DETAILS:
-        unique_rows = enrich_with_details(session, unique_rows)
+        unique_rows = enrich_with_details(unique_rows)
 
     df = pd.DataFrame(unique_rows)
 
