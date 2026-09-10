@@ -70,6 +70,22 @@
       font-size: 12px;
       color: #999;
     }
+    .source-block {
+      margin-bottom: 22px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid #eef0f3;
+    }
+    .source-block:last-of-type {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+    .source-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 10px;
+    }
     #app { display: none; }
   </style>
 </head>
@@ -83,12 +99,22 @@
       </span>
     </div>
     <h1>قائمة الأدوية البشرية المسجلة</h1>
-    <p>آخر نسخة محدّثة تلقائيًا من موقع الهيئة العامة للغذاء والدواء (SFDA)</p>
-    <a class="btn" href="data/SFDA_Drugs_latest.xlsx" download id="download-btn">
-      تحميل آخر نسخة (Excel)
-    </a>
-    <div class="meta" id="last-updated">
-      يتم تحديث الملف تلقائيًا أول كل شهر
+    <p>نسخ محدّثة تلقائيًا من موقعي الهيئة العامة للغذاء والدواء (SFDA)</p>
+
+    <div class="source-block">
+      <div class="source-title">الموقع القديم (oldsfda.sfda.gov.sa)</div>
+      <a class="btn" href="data/SFDA_Drugs_latest.xlsx" download id="download-btn">
+        تحميل النسخة (Excel)
+      </a>
+      <div class="meta" id="last-updated">جاري التحميل...</div>
+    </div>
+
+    <div class="source-block">
+      <div class="source-title">الموقع الجديد (sfda.gov.sa)</div>
+      <a class="btn" href="data/SFDA_Drugs_New_latest.xlsx" download id="download-btn-new">
+        تحميل النسخة (Excel)
+      </a>
+      <div class="meta" id="last-updated-new">جاري التحميل...</div>
     </div>
   </div>
 
@@ -119,6 +145,7 @@
         }
         document.getElementById("app").style.display = "block";
         loadLastUpdated();
+        loadLastUpdatedNew();
       } catch (e) {
         window.location.href = "login.html";
       }
@@ -135,7 +162,22 @@
         downloadBtn.href = `data/${meta.datedFileName}`;
         downloadBtn.setAttribute("download", meta.datedFileName);
       } catch (e) {
-        // لو الملف مش موجود لسه (أول تشغيلة ما خلصتش)، سيبي النص الافتراضي
+        document.getElementById("last-updated").textContent = "لسه مفيش نسخة متاحة";
+      }
+    }
+
+    async function loadLastUpdatedNew() {
+      try {
+        const res = await fetch(`data/last_updated_new.json?t=${Date.now()}`);
+        const meta = await res.json();
+        document.getElementById("last-updated-new").textContent =
+          `آخر تحديث: ${meta.date} — عدد الأدوية: ${meta.count.toLocaleString("ar-EG")}`;
+
+        const downloadBtnNew = document.getElementById("download-btn-new");
+        downloadBtnNew.href = `data/${meta.datedFileName}`;
+        downloadBtnNew.setAttribute("download", meta.datedFileName);
+      } catch (e) {
+        document.getElementById("last-updated-new").textContent = "لسه مفيش نسخة متاحة";
       }
     }
 
