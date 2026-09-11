@@ -147,7 +147,7 @@
       <h1>قائمة الأدوية البشرية المسجلة</h1>
       <p class="lead">نسخ محدّثة تلقائيًا من موقعي الهيئة العامة للغذاء والدواء (SFDA)</p>
 
-      <div class="source-block" id="source-old">
+      <div class="source-block" id="source-old" style="display:none;">
         <div class="source-title">الموقع القديم (oldsfda.sfda.gov.sa)</div>
         <a class="btn" href="data/SFDA_Drugs_latest.xlsx" download id="download-btn">
           تحميل النسخة (Excel)
@@ -155,7 +155,7 @@
         <div class="meta" id="last-updated">جاري التحميل...</div>
       </div>
 
-      <div class="source-block" id="source-new">
+      <div class="source-block" id="source-new" style="display:none;">
         <div class="source-title">الموقع الجديد (sfda.gov.sa)</div>
         <a class="btn" href="data/SFDA_Drugs_New_latest.xlsx" download id="download-btn-new">
           تحميل النسخة (Excel)
@@ -212,15 +212,13 @@
       const sourceOld = document.getElementById("source-old");
       const sourceNew = document.getElementById("source-new");
 
-      if (settings.show_old_source === false) {
-        sourceOld.style.display = "none";
-      } else {
+      if (settings.show_old_source !== false) {
+        sourceOld.style.display = "block";
         loadLastUpdated();
       }
 
-      if (settings.show_new_source === false) {
-        sourceNew.style.display = "none";
-      } else {
+      if (settings.show_new_source !== false) {
+        sourceNew.style.display = "block";
         loadLastUpdatedNew();
       }
     }
