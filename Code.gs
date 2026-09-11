@@ -25,7 +25,6 @@ const CONFIG = {
   SESSION_EXPIRY_DAYS: 7,
   MAX_OTP_ATTEMPTS: 5,
   EMAIL_SENDER_NAME: "integriox",
-  SENDER_EMAIL: "integriox@gmail.com",
 };
 
 // ---------------------- نقطة الدخول (Web App) ----------------------
@@ -113,9 +112,11 @@ function sendOtpEmail(email, name, otp) {
     "لو ما طلبتش تسجيل دخول، تجاهل الإيميل ده.\n\n" +
     CONFIG.EMAIL_SENDER_NAME;
 
-  GmailApp.sendEmail(email, subject, body, {
+  MailApp.sendEmail({
+    to: email,
+    subject: subject,
+    body: body,
     name: CONFIG.EMAIL_SENDER_NAME,
-    from: CONFIG.SENDER_EMAIL,
   });
 }
 
