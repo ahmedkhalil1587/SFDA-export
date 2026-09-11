@@ -21,6 +21,7 @@ const CONFIG = {
   SHEET_USERS: "Users",
   SHEET_OTP: "OTP_Codes",
   SHEET_SESSIONS: "Sessions",
+  SHEET_SETTINGS: "Settings",
   OTP_EXPIRY_MINUTES: 10,
   SESSION_EXPIRY_DAYS: 7,
   MAX_OTP_ATTEMPTS: 5,
@@ -51,6 +52,12 @@ function doGet(e) {
         break;
       case "listUsers":
         result = listUsers(e.parameter.token);
+        break;
+      case "getSettings":
+        result = getSettings();
+        break;
+      case "updateSetting":
+        result = updateSetting(e.parameter.token, e.parameter.key, e.parameter.value);
         break;
       case "setUserStatus":
         result = setUserStatus(e.parameter.token, e.parameter.targetEmail, e.parameter.status);
@@ -278,6 +285,60 @@ function registerUser(name, email) {
   sheet.appendRow([maxId + 1, name, email, "Employee", "Pending", new Date(), ""]);
 
   return { success: true, message: "تم التسجيل، هتقدر تسجّل دخول بعد ما الأدمن يوافق على حسابك" };
+}
+
+// ---------------------- إعدادات ظهور المصادر (Settings) ----------------------
+
+// يجيب شيت الإعدادات، ولو مش موجود ينشئه بالقيم الافتراضية (الاتنين ظاهرين)
+function getSettingsSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(CONFIG.SHEET_SETTINGS);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.SHEET_SETTINGS);
+    sheet.appendRow(["Key", "Value"]);
+    sheet.appendRow(["show_old_source", "TRUE"]);
+    sheet.appendRow(["show_new_source", "TRUE"]);
+  }
+  return sheet;
+}
+
+// إعدادات عامة - أي حد يقدر يقراها (مش فيها حاجة حساسة، مجرد إظهار/إخفاء أزرار)
+function getSettings() {
+  const sheet = getSettingsSheet();
+  const data = sheet.getDataRange().getValues();
+  const settings = {};
+
+  for (let i = 1; i < data.length; i++) {
+    const key = data[i][0];
+    if (!key) continue;
+    settings[key] = String(data[i][1]).trim().toUpperCase() === "TRUE";
+  }
+
+  return { success: true, settings: settings };
+}
+
+// تحديث إعداد معيّن - للأدمن بس
+function updateSetting(token, key, value) {
+  const check = requireAdmin(token);
+  if (!check.ok) return { success: false, message: check.message };
+
+  if (!key) {
+    return { success: false, message: "المفتاح مطلوب" };
+  }
+
+  const boolValue = (value === "true" || value === "TRUE" || value === true) ? "TRUE" : "FALSE";
+  const sheet = getSettingsSheet();
+  const data = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === key) {
+      sheet.getRange(i + 1, 2).setValue(boolValue);
+      return { success: true };
+    }
+  }
+
+  sheet.appendRow([key, boolValue]);
+  return { success: true };
 }
 
 // ---------------------- إدارة اليوزرات (أدمن بس) ----------------------

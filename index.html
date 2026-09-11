@@ -147,7 +147,7 @@
       <h1>قائمة الأدوية البشرية المسجلة</h1>
       <p class="lead">نسخ محدّثة تلقائيًا من موقعي الهيئة العامة للغذاء والدواء (SFDA)</p>
 
-      <div class="source-block">
+      <div class="source-block" id="source-old">
         <div class="source-title">الموقع القديم (oldsfda.sfda.gov.sa)</div>
         <a class="btn" href="data/SFDA_Drugs_latest.xlsx" download id="download-btn">
           تحميل النسخة (Excel)
@@ -155,7 +155,7 @@
         <div class="meta" id="last-updated">جاري التحميل...</div>
       </div>
 
-      <div class="source-block">
+      <div class="source-block" id="source-new">
         <div class="source-title">الموقع الجديد (sfda.gov.sa)</div>
         <a class="btn" href="data/SFDA_Drugs_New_latest.xlsx" download id="download-btn-new">
           تحميل النسخة (Excel)
@@ -193,12 +193,37 @@
           document.getElementById("admin-link").style.display = "inline";
         }
         document.getElementById("app").style.display = "block";
-        loadLastUpdated();
-        loadLastUpdatedNew();
+        loadSettingsAndSources();
       } catch (e) {
         window.location.href = "login.html";
       }
     })();
+
+    async function loadSettingsAndSources() {
+      let settings = { show_old_source: true, show_new_source: true };
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=getSettings`);
+        const data = await res.json();
+        if (data.success) settings = data.settings;
+      } catch (e) {
+        // لو فشل الطلب، سيبي الاتنين ظاهرين افتراضيًا
+      }
+
+      const sourceOld = document.getElementById("source-old");
+      const sourceNew = document.getElementById("source-new");
+
+      if (settings.show_old_source === false) {
+        sourceOld.style.display = "none";
+      } else {
+        loadLastUpdated();
+      }
+
+      if (settings.show_new_source === false) {
+        sourceNew.style.display = "none";
+      } else {
+        loadLastUpdatedNew();
+      }
+    }
 
     async function loadLastUpdated() {
       try {

@@ -126,6 +126,52 @@
     color: #a7adb8;
     letter-spacing: 0.2px;
   }
+  .settings-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 12px 32px -8px rgba(16,24,40,0.10);
+    padding: 20px 22px;
+    margin-bottom: 20px;
+  }
+  .settings-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .settings-hint {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+  }
+  .setting-row:first-of-type { border-top: none; padding-top: 0; }
+  .setting-label {
+    font-size: 13.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .setting-toggle {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s;
+  }
+  .setting-toggle:hover { opacity: 0.85; }
+  .setting-toggle.on { background: #e5f7ec; color: #1a8a4a; }
+  .setting-toggle.off { background: #fdecec; color: #d64545; }
+  .setting-toggle:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -138,6 +184,19 @@
         <a href="index.html">→ رجوع</a>
         <a href="#" id="logout-link">خروج</a>
       </div>
+      <div class="settings-card">
+        <div class="settings-title">مصادر التحميل الظاهرة للمستخدمين</div>
+        <div class="settings-hint">تحكّمي في أي مصدر يظهر في صفحة التحميل الرئيسية</div>
+        <div class="setting-row">
+          <span class="setting-label">الموقع القديم (oldsfda)</span>
+          <button class="setting-toggle" id="toggle-old" data-key="show_old_source">...</button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">الموقع الجديد (sfda.gov.sa)</span>
+          <button class="setting-toggle" id="toggle-new" data-key="show_new_source">...</button>
+        </div>
+      </div>
+
       <h1>إدارة اليوزرات</h1>
       <div class="card">
         <div id="content">
@@ -256,6 +315,52 @@
       window.location.href = "login.html";
     });
 
+    async function loadSettings() {
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=getSettings`);
+        const data = await res.json();
+        if (data.success) renderToggle("toggle-old", data.settings.show_old_source !== false);
+        if (data.success) renderToggle("toggle-new", data.settings.show_new_source !== false);
+      } catch (e) {
+        renderToggle("toggle-old", true);
+        renderToggle("toggle-new", true);
+      }
+    }
+
+    function renderToggle(id, isOn) {
+      const btn = document.getElementById(id);
+      btn.classList.remove("on", "off");
+      btn.classList.add(isOn ? "on" : "off");
+      btn.textContent = isOn ? "ظاهر" : "مخفي";
+      btn.dataset.current = isOn ? "true" : "false";
+    }
+
+    async function toggleSetting(btn) {
+      const key = btn.dataset.key;
+      const newValue = btn.dataset.current === "true" ? "false" : "true";
+      btn.disabled = true;
+      btn.textContent = "...";
+
+      try {
+        const res = await fetch(
+          `${WEB_APP_URL}?action=updateSetting&token=${encodeURIComponent(token)}&key=${encodeURIComponent(key)}&value=${newValue}`
+        );
+        const data = await res.json();
+        if (data.success) {
+          renderToggle(btn.id, newValue === "true");
+        } else {
+          alert(data.message || "حصل خطأ");
+        }
+      } catch (e) {
+        alert("مشكلة في الاتصال");
+      }
+      btn.disabled = false;
+    }
+
+    document.getElementById("toggle-old").addEventListener("click", (e) => toggleSetting(e.target));
+    document.getElementById("toggle-new").addEventListener("click", (e) => toggleSetting(e.target));
+
+    loadSettings();
     loadUsers();
   </script>
 </body>
