@@ -195,6 +195,10 @@
           <span class="setting-label">الموقع الجديد (sfda.gov.sa)</span>
           <button class="setting-toggle" id="toggle-new" data-key="show_new_source">...</button>
         </div>
+        <div class="setting-row">
+          <span class="setting-label">المستحضرات العشبية والصحية</span>
+          <button class="setting-toggle" id="toggle-herbal" data-key="show_herbal_source">...</button>
+        </div>
       </div>
 
       <h1>إدارة اليوزرات</h1>
@@ -319,11 +323,15 @@
       try {
         const res = await fetch(`${WEB_APP_URL}?action=getSettings`);
         const data = await res.json();
-        if (data.success) renderToggle("toggle-old", data.settings.show_old_source !== false);
-        if (data.success) renderToggle("toggle-new", data.settings.show_new_source !== false);
+        if (data.success) {
+          renderToggle("toggle-old", data.settings.show_old_source !== false);
+          renderToggle("toggle-new", data.settings.show_new_source !== false);
+          renderToggle("toggle-herbal", data.settings.show_herbal_source !== false);
+        }
       } catch (e) {
         renderToggle("toggle-old", true);
         renderToggle("toggle-new", true);
+        renderToggle("toggle-herbal", true);
       }
     }
 
@@ -359,6 +367,7 @@
 
     document.getElementById("toggle-old").addEventListener("click", (e) => toggleSetting(e.target));
     document.getElementById("toggle-new").addEventListener("click", (e) => toggleSetting(e.target));
+    document.getElementById("toggle-herbal").addEventListener("click", (e) => toggleSetting(e.target));
 
     loadSettings();
     loadUsers();
